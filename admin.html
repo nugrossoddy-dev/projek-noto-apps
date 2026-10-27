@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOTO Admin Operations Hub | QRIS & User Management</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-portal-wrapper">
+
+  <!-- ======================================================================
+       1. ADMIN AUTHENTICATION SCREEN (PIN GATE)
+       ====================================================================== -->
+  <div id="admin-auth-screen" class="admin-auth-wrapper">
+    <div class="admin-auth-card">
+      <div class="admin-auth-shield-icon">🛡️</div>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <div class="brand-symbol" style="width: 28px; height: 28px; font-size: 0.95rem;">N</div>
+          <span style="font-weight: 800; font-size: 1.35rem; letter-spacing: -0.5px;">NOTO</span>
+          <span class="badge badge-amber" style="font-size: 0.7rem; padding: 2px 8px; font-weight: 700;">STAFF</span>
+        </div>
+        <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 6px;">Admin Operations Hub</h2>
+        <p style="color: var(--text-muted); font-size: 0.86rem; line-height: 1.45;">
+          Portal otorisasi khusus staf & pengelola pembayaran QRIS. Silakan masukkan PIN administrator untuk melanjutkan.
+        </p>
+      </div>
+
+      <form id="admin-login-form" onsubmit="AdminPanel.handleLoginSubmit(event)">
+        <div class="form-group">
+          <label for="admin-pin-input" style="font-size: 0.86rem; font-weight: 600;">PIN / Password Administrator</label>
+          <div style="position: relative;">
+            <input type="password" id="admin-pin-input" class="form-input" placeholder="Masukkan PIN Staff..." required autofocus style="padding-right: 42px;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="AdminPanel.togglePinVisibility()" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 4px 8px;" title="Lihat PIN">👁️</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <span style="font-size: 0.74rem; color: var(--accent-forest); font-weight: 600;">
+              💡 Demo PIN: <code style="font-family: var(--font-mono); font-weight: 700; background: var(--bg-surface-soft); padding: 1px 4px; border-radius: 4px;">noto2026</code>
+            </span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; font-weight: 700; padding: 11px; margin-top: 14px; box-shadow: var(--shadow-md);">
+          Masuk ke Admin Portal →
+        </button>
+      </form>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-subtle); text-align: center;">
+        <a href="index.html" class="btn btn-ghost btn-sm" style="color: var(--text-muted); font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px;">
+          ← Kembali ke Platform Pelanggan (NOTO App)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       2. MAIN ADMIN OPERATIONS DASHBOARD (AUTHENTICATED)
+       ====================================================================== -->
+  <div id="admin-main-app" style="display: none; flex-direction: column; min-height: 100vh;">
+    
+    <!-- Top Sticky Navigation Bar -->
+    <header class="admin-portal-header">
+      <div class="admin-portal-header-left">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="brand-symbol" style="width: 32px; height: 32px; font-size: 1rem;">N</div>
+          <div style="display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px;">NOTO</span>
+              <span class="badge badge-amber" style="font-size: 0.68rem; padding: 2px 7px; font-weight: 700;">OPERATIONS HUB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-portal-header-right">
+        <a href="index.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;" title="Buka aplikasi pelanggan">
+          <span>🚀</span> Aplikasi Workspace
+        </a>
+        <a href="../web/index.html" class="btn btn-ghost btn-sm" style="display: flex; align-items: center; gap: 6px;" title="Buka website publik">
+          <span>🌐</span> Website
+        </a>
+        <span class="admin-badge-active" style="display: inline-flex; align-items: center; gap: 6px;">● STAFF VERIFIED</span>
+        <button class="btn btn-ghost btn-sm" onclick="AdminPanel.toggleTheme()" id="admin-theme-toggle" title="Ganti Tema">🌙</button>
+        <button class="btn btn-ghost btn-sm" onclick="AdminPanel.logout()" style="color: var(--accent-coral);" title="Keluar dari Admin">
+          🚪 Keluar
+        </button>
+      </div>
+    </header>
+
+    <!-- Admin Content Container -->
+    <main class="admin-portal-container">
+      
+      <!-- Operations Header Bar -->
+      <div class="tasks-header-bar" style="margin-bottom: 24px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; letter-spacing: -0.5px;">NOTO Admin Operations</h1>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Pusat kendali transaksi QRIS, verifikasi struk bukti bayar, kuota AI & manajemen langganan pengguna NOTO.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="AdminPanel.exportTransactionsCSV()">
+            📥 Ekspor CSV
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="AdminPanel.openManualTrxModal()">
+            ➕ Trx Manual
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="AdminPanel.render()" title="Muat ulang data">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Top KPI Metrics Grid -->
+      <div class="admin-kpi-grid">
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="admin-kpi-label">Total Omset (Gross)</span>
+            <div class="admin-kpi-icon" style="color: #10B981;">💰</div>
+          </div>
+          <div class="admin-kpi-val" id="admin-kpi-revenue">Rp0</div>
+          <div class="admin-kpi-sub" id="admin-kpi-revenue-sub">0 transaksi lunas terverifikasi</div>
+        </div>
+
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="admin-kpi-label">Transaksi QRIS</span>
+            <div class="admin-kpi-icon" style="color: #3B82F6;">🧾</div>
+          </div>
+          <div class="admin-kpi-val" id="admin-kpi-trx-count">0</div>
+          <div class="admin-kpi-sub" id="admin-kpi-pending-badge">0 perlu dicek</div>
+        </div>
+
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="admin-kpi-label">Pelanggan Pro</span>
+            <div class="admin-kpi-icon" style="color: #F59E0B;">💎</div>
+          </div>
+          <div class="admin-kpi-val" id="admin-kpi-pro-users">1</div>
+          <div class="admin-kpi-sub">Unlimited AI Coaches active</div>
+        </div>
+
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-header">
+            <span class="admin-kpi-label">Status Merchant</span>
+            <div class="admin-kpi-icon" style="color: #6366F1;">🛡️</div>
+          </div>
+          <div class="admin-kpi-val" style="font-size: 1.25rem;">ONLINE</div>
+          <div class="admin-kpi-sub" id="admin-kpi-merchant-name">NOTO, DIGITAL & KREATIF</div>
+        </div>
+      </div>
+
+      <!-- Admin Tabs Navigation -->
+      <div class="admin-tabs-nav">
+        <button class="admin-tab-btn active" data-tab="transactions" onclick="AdminPanel.switchTab('transactions')">
+          💳 Transaksi & Bukti Pembayaran (<span id="admin-tab-count-trx">0</span>)
+        </button>
+        <button class="admin-tab-btn" data-tab="users" onclick="AdminPanel.switchTab('users')">
+          👥 Manajemen Pengguna & Langganan
+        </button>
+        <button class="admin-tab-btn" data-tab="config" onclick="AdminPanel.switchTab('config')">
+          ⚙️ Pengaturan Merchant & Harga Paket
+        </button>
+        <button class="admin-tab-btn" data-tab="logs" onclick="AdminPanel.switchTab('logs')">
+          📜 Log Audit Sistem
+        </button>
+      </div>
+
+      <!-- TAB 1: TRANSAKSI & BUKTI PEMBAYARAN -->
+      <div id="admin-tab-content-transactions" class="admin-tab-content">
+        <div class="admin-filter-bar">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm active" id="filter-trx-all" onclick="AdminPanel.filterTrx('all')">Semua</button>
+            <button class="btn btn-secondary btn-sm" id="filter-trx-verified" onclick="AdminPanel.filterTrx('verified')">Lunas (Verified)</button>
+            <button class="btn btn-secondary btn-sm" id="filter-trx-pending" onclick="AdminPanel.filterTrx('pending')">Perlu Dicek (Pending)</button>
+            <button class="btn btn-secondary btn-sm" id="filter-trx-rejected" onclick="AdminPanel.filterTrx('rejected')">Ditolak / Batal</button>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="admin-trx-search" class="form-input admin-search-input" placeholder="Cari invoice / nama..." oninput="AdminPanel.renderTransactionsTable()">
+            <button class="btn btn-ghost btn-sm" onclick="AdminPanel.render()" title="Refresh data">🔄</button>
+          </div>
+        </div>
+        <div class="transactions-container-card" style="margin-top: 0;">
+          <div id="admin-transactions-table-container"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MANAJEMEN PENGGUNA -->
+      <div id="admin-tab-content-users" class="admin-tab-content" style="display: none;">
+        <div class="transactions-container-card" style="margin-top: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">Daftar Akun Pengguna</h3>
+              <p style="color: var(--text-muted); font-size: 0.84rem;">Atur hak akses premium, masa aktif, dan kuota AI pengguna secara langsung.</p>
+            </div>
+          </div>
+          <div id="admin-users-table-container"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: PENGATURAN MERCHANT & HARGA -->
+      <div id="admin-tab-content-config" class="admin-tab-content" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          <div class="today-panel-card">
+            <h3 style="margin-bottom: 16px; font-weight: 700;">Konfigurasi QRIS Merchant</h3>
+            <form onsubmit="AdminPanel.saveMerchantConfig(event)">
+              <div class="form-group">
+                <label for="cfg-merchant-name">Nama Merchant Resmi</label>
+                <input type="text" id="cfg-merchant-name" class="form-input" value="NOTO, DIGITAL & KREATIF" required>
+              </div>
+              <div class="form-group">
+                <label for="cfg-merchant-nmid">NMID Nasional</label>
+                <input type="text" id="cfg-merchant-nmid" class="form-input" value="ID1026615042680" required>
+              </div>
+              <div class="form-group">
+                <label for="cfg-merchant-printed">Kode Dicetak Oleh</label>
+                <input type="text" id="cfg-merchant-printed" class="form-input" value="93600914" required>
+              </div>
+              <div class="form-group">
+                <label for="cfg-merchant-provider">Acquirer / Provider</label>
+                <input type="text" id="cfg-merchant-provider" class="form-input" value="GoPay Merchant (GPN)" readonly style="opacity: 0.8;">
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Simpan Data Merchant</button>
+            </form>
+          </div>
+
+          <div class="today-panel-card">
+            <h3 style="margin-bottom: 16px; font-weight: 700;">Pengaturan Harga Paket (IDR)</h3>
+            <form onsubmit="AdminPanel.savePricingConfig(event)">
+              <div class="form-group">
+                <label for="cfg-price-monthly">Paket Bulanan (Monthly)</label>
+                <input type="number" id="cfg-price-monthly" class="form-input" value="20000" step="1000" required>
+              </div>
+              <div class="form-group">
+                <label for="cfg-price-6month">Paket 6 Bulan (6-Month)</label>
+                <input type="number" id="cfg-price-6month" class="form-input" value="100000" step="1000" required>
+              </div>
+              <div class="form-group">
+                <label for="cfg-price-yearly">Paket 1 Tahun (Yearly Pro)</label>
+                <input type="number" id="cfg-price-yearly" class="form-input" value="160000" step="1000" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Simpan Perubahan Harga</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: LOG AUDIT SISTEM -->
+      <div id="admin-tab-content-logs" class="admin-tab-content" style="display: none;">
+        <div class="transactions-container-card" style="margin-top: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">Audit Trail Aktivitas Admin & Pembayaran</h3>
+              <p style="color: var(--text-muted); font-size: 0.84rem;">Riwayat tindakan operasional staf, verifikasi transaksi, dan perubahan paket.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="AdminPanel.clearLogs()">Hapus Log</button>
+          </div>
+          <div id="admin-logs-container"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ======================================================================
+       3. MODALS
+       ====================================================================== -->
+  
+  <!-- Modal 1: Payment Proof Viewer & Verification Inspector -->
+  <div id="modal-admin-proof-viewer" class="modal-overlay">
+    <div class="modal-box modal-proof-inspector">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            <span>🛡️</span> Pemeriksaan Bukti Pembayaran QRIS
+          </h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Verifikasi keabsahan transfer sebelum mengaktifkan fitur pengguna</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="Modals.close('modal-admin-proof-viewer')">✕</button>
+      </div>
+
+      <div class="proof-inspector-grid">
+        <!-- Left Column: Image Struk Preview -->
+        <div class="proof-image-card">
+          <img id="proof-viewer-img" src="" alt="Bukti Transfer" class="proof-modal-preview">
+          <div class="proof-image-actions">
+            <a id="proof-viewer-open-link" href="#" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.74rem; padding: 4px 10px;">
+              🔍 Ukuran Penuh
+            </a>
+            <a id="proof-viewer-dl-link" href="#" download="bukti-transfer.png" class="btn btn-secondary btn-sm" style="font-size: 0.74rem; padding: 4px 10px;">
+              📥 Unduh Gambar
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Column: Verification Details & Action Buttons -->
+        <div class="proof-details-card">
+          <div class="proof-meta-box">
+            <div class="proof-meta-row">
+              <span style="color: var(--text-muted);">Status Transaksi:</span>
+              <span id="proof-viewer-status-badge" class="badge-status-pending">Menunggu Verifikasi</span>
+            </div>
+            <div class="proof-meta-row">
+              <span style="color: var(--text-muted);">Pelanggan:</span>
+              <strong id="proof-viewer-user">Alex Pratama</strong>
+            </div>
+            <div class="proof-meta-row">
+              <span style="color: var(--text-muted);">No. Invoice:</span>
+              <code id="proof-viewer-inv" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-forest);">-</code>
+            </div>
+            <div class="proof-meta-row">
+              <span style="color: var(--text-muted);">Paket / Item:</span>
+              <span id="proof-viewer-item">-</span>
+            </div>
+            <div class="proof-meta-row" style="border-top: 1px dashed var(--border-subtle); padding-top: 8px; margin-top: 8px;">
+              <span style="color: var(--text-muted); font-weight: 600;">Total Nominal:</span>
+              <div class="order-amount-highlight" id="proof-viewer-amount" style="font-size: 1.25rem;">-</div>
+            </div>
+            <div class="proof-meta-row">
+              <span style="color: var(--text-muted);">Waktu Upload:</span>
+              <span id="proof-viewer-time" style="font-size: 0.8rem;">-</span>
+            </div>
+          </div>
+
+          <div class="proof-instruction-notice">
+            <strong>Checklist Verifikasi:</strong>
+            <div style="margin-top: 4px;">• Pastikan dana masuk ke rekening/GoPay <strong>NOTO, DIGITAL & KREATIF</strong>.</div>
+            <div>• Nominal tepat dan tanpa selisih.</div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="proof-action-buttons">
+            <button type="button" class="btn btn-coral" id="proof-btn-reject" onclick="AdminPanel.rejectCurrentTrx()" style="flex: 1; font-size: 0.82rem;">
+              ✕ Tolak Bukti
+            </button>
+            <button type="button" class="btn btn-primary" id="proof-btn-approve" onclick="AdminPanel.approveCurrentTrx()" style="flex: 2; font-weight: 700; font-size: 0.85rem; box-shadow: var(--shadow-md);">
+              ✓ Setujui (Aktifkan Pro)
+            </button>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="Modals.close('modal-admin-proof-viewer')" style="color: var(--text-muted); margin-top: -4px;">
+            Tutup Jendela
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Manual Transaction Modal -->
+  <div id="modal-admin-manual-trx" class="modal-overlay">
+    <div class="modal-box" style="max-width: 520px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Catat Transaksi Manual</h3>
+        <button class="btn btn-ghost btn-sm" onclick="Modals.close('modal-admin-manual-trx')">✕</button>
+      </div>
+      <form onsubmit="AdminPanel.handleManualTrxSubmit(event)">
+        <div class="form-group">
+          <label for="manual-customer-name">Nama Pelanggan / Email</label>
+          <input type="text" id="manual-customer-name" class="form-input" placeholder="e.g. Alex Pratama" required>
+        </div>
+        <div class="form-group">
+          <label for="manual-item-select">Paket / Layanan</label>
+          <select id="manual-item-select" class="form-select" onchange="AdminPanel.onManualItemChange(this.value)">
+            <option value="Yearly Plan|Rp160.000|160000|subscription">Yearly Plan (1 Tahun Pro) - Rp160.000</option>
+            <option value="Monthly Plan|Rp20.000|20000|subscription">Monthly Plan - Rp20.000</option>
+            <option value="6-Month Plan|Rp100.000|100000|subscription">6 Months Plan - Rp100.000</option>
+            <option value="AI Career Planner|Rp25.000|25000|addon">AI Career Planner (Addon) - Rp25.000</option>
+            <option value="Meeting Minutes Auto-Generator|Rp15.000|15000|addon">Meeting Minutes (Addon) - Rp15.000</option>
+            <option value="AI Study Plan Generator|Rp20.000|20000|addon">AI Study Plan (Addon) - Rp20.000</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="manual-amount-input">Nominal Pembayaran (IDR)</label>
+          <input type="number" id="manual-amount-input" class="form-input" value="160000" required>
+        </div>
+        <div class="form-group">
+          <label for="manual-method-select">Kanal Pembayaran</label>
+          <select id="manual-method-select" class="form-select">
+            <option value="QRIS (GoPay Merchant)">QRIS (GoPay Merchant)</option>
+            <option value="Transfer Bank BCA Manual">Transfer Bank BCA Manual</option>
+            <option value="Transfer Mandiri / Livin">Transfer Mandiri / Livin</option>
+            <option value="Tunai / Kasir Offline">Tunai / Kasir Offline</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="manual-status-select">Status Awal</label>
+          <select id="manual-status-select" class="form-select">
+            <option value="Lunas (Verified)">Langsung Lunas (Aktifkan Paket)</option>
+            <option value="Menunggu Verifikasi (Pending)">Pending (Perlu Verifikasi)</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="Modals.close('modal-admin-manual-trx')">Batal</button>
+          <button type="submit" class="btn btn-primary" style="font-weight: 700;">Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Receipt Invoice Viewer -->
+  <div id="modal-receipt" class="modal-overlay">
+    <div class="modal-box modal-receipt-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <span class="badge badge-success">Official Receipt</span>
+        <button class="btn btn-ghost btn-sm" onclick="Modals.close('modal-receipt')">✕</button>
+      </div>
+      
+      <div class="receipt-sheet" id="receipt-printable-area">
+        <div class="receipt-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <div class="brand-symbol" style="width: 24px; height: 24px; font-size: 0.8rem;">N</div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">NOTO Workspace</h3>
+              </div>
+              <p style="font-size: 0.74rem; color: var(--text-muted); margin: 0;">PT Noto Solusi Digital Indonesia</p>
+            </div>
+            <div style="text-align: right;">
+              <span class="receipt-status-badge" id="admin-receipt-status-badge">LUNAS</span>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;" id="admin-receipt-inv-badge">INV-000000</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 16px 0; border-bottom: 1px solid var(--border-subtle);">
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">No. Transaksi</span>
+            <strong id="admin-receipt-invoice-no" style="font-family: var(--font-mono);">-</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Tanggal & Waktu</span>
+            <span id="admin-receipt-date-time">-</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Pelanggan</span>
+            <strong id="admin-receipt-customer-name">Alex Pratama</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Metode Pembayaran</span>
+            <span>QRIS Standar Indonesia (GPN)</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Merchant Penerima</span>
+            <span id="admin-receipt-merchant">NOTO, DIGITAL & KREATIF</span>
+          </div>
+        </div>
+
+        <div style="padding: 16px 0;">
+          <div class="receipt-row">
+            <span id="admin-receipt-item-name" style="font-weight: 600;">Paket Layanan</span>
+            <span id="admin-receipt-item-price" style="font-family: var(--font-mono);">-</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted); font-size: 0.78rem;">Pajak & Biaya QRIS (0%)</span>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">Rp0</span>
+          </div>
+          <div class="receipt-row-total">
+            <span style="font-size: 1rem; font-weight: 700;">Total Dibayar</span>
+            <strong id="admin-receipt-total-paid" class="order-amount-highlight" style="font-size: 1.25rem;">-</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="window.print()">
+          🖨️ Cetak Struk
+        </button>
+        <button class="btn btn-primary" style="flex: 1;" onclick="Modals.close('modal-receipt')">
+          Selesai
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Admin Controller JavaScript -->
+  <script src="admin.js"></script>
+</body>
+</html>

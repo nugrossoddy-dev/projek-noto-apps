@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NOTO — Get Things Done. Google Calendar meets an AI Productivity Coach. Warm, refined personal productivity workspace.">
+  <meta name="theme-color" content="#2563EB">
+  <title>NOTO — Workspace & Productivity App</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NOTO">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-root">
+
+    <!-- ======================================================================
+         2. AUTHENTICATION SCREENS (REGISTER, LOGIN, ONBOARDING, RESET)
+         ====================================================================== -->
+    <!-- Register -->
+    <section id="view-auth-register" class="view-section">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="brand-symbol" style="margin: 0 auto;">N</div>
+            <h2>Create your account</h2>
+            <p>Begin your journey towards calm, structured focus.</p>
+          </div>
+          <form id="form-register" onsubmit="Auth.handleRegister(event)">
+            <div class="form-group">
+              <label for="reg-name">Full Name</label>
+              <input type="text" id="reg-name" class="form-input" placeholder="e.g. Alex Pratama" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-email">Email Address</label>
+              <input type="email" id="reg-email" class="form-input" placeholder="alex@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-password">Password</label>
+              <input type="password" id="reg-password" class="form-input" placeholder="••••••••" minlength="6" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-confirm">Confirm Password</label>
+              <input type="password" id="reg-confirm" class="form-input" placeholder="••••••••" minlength="6" required>
+            </div>
+            <div style="margin-bottom: 20px; font-size: 0.82rem; color: var(--text-muted);">
+              <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="reg-terms" required>
+                <span>I accept the Terms of Service & Privacy Policy</span>
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+          </form>
+          <div style="margin-top: 18px; text-align: center; font-size: 0.86rem; color: var(--text-muted);">
+            Already have an account? <a href="javascript:void(0)" onclick="App.navigateTo('auth-login')" style="color: var(--accent-forest); font-weight: 600;">Sign in</a>
+          </div>
+          <div style="margin-top: 12px; text-align: center;">
+            <a href="javascript:void(0)" onclick="App.navigateTo('marketing')" style="font-size: 0.82rem; color: var(--text-muted); text-decoration: none;">← Kembali ke Website Utama</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Email Verification Modal / Screen -->
+    <section id="view-auth-verify" class="view-section">
+      <div class="auth-wrapper">
+        <div class="auth-card" style="text-align: center;">
+          <div class="brand-symbol" style="margin: 0 auto 12px;">N</div>
+          <h2>Verify Your Email</h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">
+            We've sent a 6-digit confirmation code to your email.
+          </p>
+          <div class="badge badge-amber" style="margin-bottom: 16px;">Demo Mode: Enter any 6 numbers (e.g. 123456)</div>
+          
+          <div class="verification-code-row" id="code-inputs">
+            <input type="text" maxlength="1" class="code-cell" autofocus oninput="Auth.handleCodeInput(this, 0)">
+            <input type="text" maxlength="1" class="code-cell" oninput="Auth.handleCodeInput(this, 1)">
+            <input type="text" maxlength="1" class="code-cell" oninput="Auth.handleCodeInput(this, 2)">
+            <input type="text" maxlength="1" class="code-cell" oninput="Auth.handleCodeInput(this, 3)">
+            <input type="text" maxlength="1" class="code-cell" oninput="Auth.handleCodeInput(this, 4)">
+            <input type="text" maxlength="1" class="code-cell" oninput="Auth.handleCodeInput(this, 5)">
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="Auth.confirmVerification()">Confirm & Continue</button>
+          <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted);">
+            Didn't receive code? <a href="javascript:void(0)" onclick="Toast.show('New demo code simulated: 882194')">Resend Code</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Onboarding Flow -->
+    <section id="view-auth-onboarding" class="view-section">
+      <div class="auth-wrapper">
+        <div class="auth-card" style="max-width: 520px;">
+          <div class="auth-header">
+            <span class="badge badge-sage">Personalizing NOTO</span>
+            <h2>Tell us how you work</h2>
+            <p>Customize your workspace to match your rhythm and goals.</p>
+          </div>
+          <form onsubmit="Auth.completeOnboarding(event)">
+            <div class="form-group">
+              <label>Primary Productivity Goal</label>
+              <select id="onb-goal" class="form-select">
+                <option value="deep-work">Deep Work & Focused Output</option>
+                <option value="time-management">Better Daily Time Management</option>
+                <option value="thesis-academic">Thesis / Academic Milestones</option>
+                <option value="business-freelance">Freelance & Client Organization</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Preferred Working Hours</label>
+              <select id="onb-hours" class="form-select">
+                <option value="morning">Morning Focus (08:00 – 16:00)</option>
+                <option value="standard">Standard Business (09:00 – 17:00)</option>
+                <option value="night-owl">Evening / Night Owl (14:00 – 22:00)</option>
+                <option value="flexible">Flexible / Project-Based</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Default Focus Duration</label>
+              <select id="onb-focus" class="form-select">
+                <option value="25">25 minutes (Classic Pomodoro)</option>
+                <option value="45">45 minutes (Deep Block)</option>
+                <option value="60">60 minutes (Ultra Focus)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="onb-mood" checked>
+                <span>Enable optional mood and energy reflections</span>
+              </label>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+              <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="Auth.completeOnboarding(event)">Skip for Now</button>
+              <button type="submit" class="btn btn-primary" style="flex: 1;">Save & Enter NOTO</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Login -->
+    <section id="view-auth-login" class="view-section">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="brand-symbol" style="margin: 0 auto;">N</div>
+            <h2>Welcome back</h2>
+            <p>Sign in to your private NOTO workspace.</p>
+          </div>
+          <form onsubmit="Auth.handleLogin(event)">
+            <div class="form-group">
+              <label for="login-email">Email Address</label>
+              <input type="email" id="login-email" class="form-input" placeholder="alex@example.com" required>
+            </div>
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between;">
+                <label for="login-password">Password</label>
+                <a href="javascript:void(0)" onclick="Auth.showPasswordReset()" style="font-size: 0.82rem; color: var(--accent-forest);">Forgot?</a>
+              </div>
+              <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+          </form>
+          <div style="margin-top: 18px; text-align: center; font-size: 0.86rem; color: var(--text-muted);">
+            Don't have an account? <a href="javascript:void(0)" onclick="App.navigateTo('auth-register')" style="color: var(--accent-forest); font-weight: 600;">Register free</a>
+          </div>
+          <div style="margin-top: 12px; text-align: center;">
+            <a href="javascript:void(0)" onclick="App.navigateTo('marketing')" style="font-size: 0.82rem; color: var(--text-muted); text-decoration: none;">← Kembali ke Website Utama</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         3. MAIN PRODUCTIVITY APPLICATION (AUTHENTICATED SHELL)
+         ====================================================================== -->
+    <div id="main-app-shell" style="display: none;">
+      <div class="app-container">
+        
+        <!-- Desktop Sidebar -->
+        <aside class="app-sidebar">
+          <div class="sidebar-header">
+            <div class="brand-logo" onclick="App.navigateTo('app-today')" style="cursor: pointer;" title="NOTO Workspace">
+              <div class="brand-symbol">N</div>
+              <span>NOTO</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <a href="javascript:void(0)" onclick="App.navigateTo('marketing')" class="btn btn-ghost btn-sm" title="Kembali ke Website Utama" style="font-size: 0.78rem; padding: 4px 8px; text-decoration: none;">🌐 Web</a>
+              <button class="btn btn-ghost btn-sm" onclick="App.toggleTheme()" title="Toggle Light/Dark Theme">🌓</button>
+            </div>
+          </div>
+
+          <div class="sidebar-content">
+            <div class="nav-group-title">WORKSPACE</div>
+            <div class="sidebar-nav-item" data-view="app-today" onclick="App.navigateTo('app-today')">
+              <span style="display: flex; align-items: center; gap: 8px;">☀️ Today</span>
+              <span class="badge badge-sage" id="sb-today-count">0</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-tasks" onclick="App.navigateTo('app-tasks')">
+              <span style="display: flex; align-items: center; gap: 8px;">✓ Tasks</span>
+              <span class="badge badge-neutral" id="sb-tasks-count">0</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-calendar" onclick="App.navigateTo('app-calendar')">
+              <span style="display: flex; align-items: center; gap: 8px;">📅 Calendar</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-focus" onclick="App.navigateTo('app-focus')">
+              <span style="display: flex; align-items: center; gap: 8px;">⏱️ Focus Mode</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-notes" onclick="App.navigateTo('app-notes')">
+              <span style="display: flex; align-items: center; gap: 8px;">📝 Reference Hub</span>
+            </div>
+
+            <div class="nav-group-title">INTELLIGENCE</div>
+            <div class="sidebar-nav-item" data-view="app-insights" onclick="App.navigateTo('app-insights')">
+              <span style="display: flex; align-items: center; gap: 8px;">📊 Insights</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-ai" onclick="App.navigateTo('app-ai')">
+              <span style="display: flex; align-items: center; gap: 8px;">✨ AI Coach</span>
+              <span class="badge badge-amber">Demo</span>
+            </div>
+
+            <div class="nav-group-title">ACCOUNT</div>
+            <div class="sidebar-nav-item" data-view="app-premium" onclick="App.navigateTo('app-premium')">
+              <span style="display: flex; align-items: center; gap: 8px;">⭐ Premium</span>
+            </div>
+            <div class="sidebar-nav-item" data-view="app-settings" onclick="App.navigateTo('app-settings')">
+              <span style="display: flex; align-items: center; gap: 8px;">⚙️ Settings</span>
+            </div>
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="user-badge">
+              <div class="avatar-placeholder" id="user-avatar-initial">A</div>
+              <div>
+                <div style="font-size: 0.85rem; font-weight: 600;" id="user-display-name">Alex Pratama</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);" id="user-plan-badge">Free Plan</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="Auth.logout()" title="Sign Out">🚪</button>
+          </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <div class="app-main">
+          
+          <!-- Topbar -->
+          <header class="app-topbar">
+            <div class="topbar-left">
+              <div class="global-search-box">
+                <span>🔍</span>
+                <input type="text" id="global-search-input" placeholder="Search tasks, notes..." oninput="App.handleGlobalSearch(this.value)">
+              </div>
+            </div>
+            <div class="topbar-right">
+              <button id="btn-install-app" class="btn btn-secondary btn-sm" style="display: none;" onclick="PWAInstaller.promptInstall()">📲 Install App</button>
+              <button class="btn btn-secondary btn-sm" onclick="Modals.openQuickTask()">+ New Task</button>
+              <button class="btn btn-primary btn-sm" onclick="App.navigateTo('app-focus')">Start Focus</button>
+            </div>
+          </header>
+
+          <!-- Dynamic Workspace Views -->
+          <div class="workspace-content">
+
+            <!-- 3.1 TODAY VIEW -->
+            <section id="view-app-today" class="view-section">
+              <div class="today-banner-card">
+                <div class="banner-content">
+                  <div class="today-date-badge" id="today-banner-date">MONDAY, OCT 13</div>
+                  <h1 class="today-greeting" id="today-greeting-text">Good morning, Alex. Let's make today count.</h1>
+                  <p class="today-summary-text" id="today-summary-text">You have 3 tasks scheduled today. Your highest energy peak is estimated right now.</p>
+                </div>
+                <div class="banner-actions">
+                  <button class="btn btn-primary" onclick="Modals.openQuickTask()">+ Add Task</button>
+                  <button class="btn btn-secondary" onclick="FocusMode.startWithCurrentSpotlight()">⚡ Start Deep Work</button>
+                </div>
+              </div>
+
+              <!-- Stat Grid -->
+              <div class="stat-cards-grid">
+                <div class="stat-card">
+                  <div class="stat-card-icon">🎯</div>
+                  <span class="stat-card-label">Tasks Completed</span>
+                  <span class="stat-card-value" id="stat-completed-count">0</span>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-icon">📋</div>
+                  <span class="stat-card-label">Remaining Tasks</span>
+                  <span class="stat-card-value" id="stat-remaining-count">0</span>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-icon">⏱️</div>
+                  <span class="stat-card-label">Focus Time Today</span>
+                  <span class="stat-card-value" id="stat-focus-time">0m</span>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-icon">🔥</div>
+                  <span class="stat-card-label">Current Streak</span>
+                  <span class="stat-card-value" id="stat-streak-days">1 day</span>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-card-icon">📈</div>
+                  <span class="stat-card-label">Completion Rate</span>
+                  <span class="stat-card-value" id="stat-completion-rate">0%</span>
+                </div>
+              </div>
+
+              <!-- Today Layout Split -->
+              <div class="today-layout">
+                <!-- Left Column -->
+                <div>
+                  <!-- Priority Spotlight -->
+                  <div class="priority-spotlight" id="priority-spotlight-box">
+                    <div class="priority-info">
+                      <span class="badge badge-amber" style="margin-bottom: 6px;">Top Priority Task</span>
+                      <h4 id="spotlight-title">No priority task selected</h4>
+                      <div class="priority-meta" id="spotlight-meta">
+                        <span>Estimate: 25m</span> • <span>Category: Work</span>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="spotlight-focus-btn" onclick="FocusMode.startWithCurrentSpotlight()">Start Focus</button>
+                  </div>
+
+                  <!-- Inline Task Quick Capture -->
+                  <div class="inline-task-box">
+                    <input type="text" id="inline-task-title" placeholder="Capture a task for today (Press Enter)..." onkeydown="if(event.key==='Enter') Tasks.addInlineToday()">
+                    <button class="btn btn-primary btn-sm" onclick="Tasks.addInlineToday()">Add</button>
+                  </div>
+
+                  <!-- Today's Tasks List -->
+                  <div class="today-panel-card">
+                    <div class="panel-title-bar">
+                      <h3>Today's Agenda</h3>
+                      <span style="font-size: 0.82rem; color: var(--text-muted);" id="today-tasks-count-label">0 tasks</span>
+                    </div>
+                    <div id="today-tasks-container">
+                      <!-- Rendered by JavaScript -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column: AI Suggestion, Mood & Sponsored -->
+                <div>
+                  <!-- AI Contextual Suggestion -->
+                  <div class="today-panel-card" style="border-left: 4px solid var(--accent-forest);">
+                    <div class="panel-title-bar">
+                      <h3 style="display: flex; align-items: center; gap: 6px;">✨ AI Daily Guidance</h3>
+                      <span class="badge badge-sage">Coach</span>
+                    </div>
+                    <p style="font-size: 0.92rem; color: var(--text-primary); line-height: 1.6; margin-bottom: 12px;" id="ai-daily-suggestion-text">
+                      “Your peak focus window is between 09:00 and 11:30. Tackle your highest priority task early to create momentum.”
+                    </p>
+                    <button class="btn btn-secondary btn-sm" onclick="App.navigateTo('app-ai')">Ask Coach For Help</button>
+                  </div>
+
+                  <!-- Emotional Productivity Quick Log -->
+                  <div class="today-panel-card">
+                    <div class="panel-title-bar">
+                      <h3>Energy & Mood Check-In</h3>
+                      <span style="font-size: 0.78rem; color: var(--text-muted);">Optional</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">How are you feeling right now?</div>
+                    <div style="display: flex; gap: 8px; justify-content: space-between; margin-bottom: 16px;">
+                      <button class="btn btn-secondary btn-sm mood-btn" onclick="MoodLogger.log(1, 'Drained')">😴 Low</button>
+                      <button class="btn btn-secondary btn-sm mood-btn" onclick="MoodLogger.log(3, 'Balanced')">🙂 Steady</button>
+                      <button class="btn btn-secondary btn-sm mood-btn" onclick="MoodLogger.log(5, 'Energized')">⚡ High</button>
+                    </div>
+                    <div id="last-mood-logged" style="font-size: 0.78rem; color: var(--accent-forest); text-align: center;"></div>
+                  </div>
+
+                  <!-- Sponsored Non-Intrusive Banner (Free Tier) -->
+                  <div class="sponsored-box">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); margin-bottom: 4px;">SPONSORED RECOMMENDATION</div>
+                    <div style="font-weight: 600; margin-bottom: 2px;">FocusMaster Ergonomic Desk Setup</div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">Explore curated productivity gear for focused remote professionals.</p>
+                    <a href="javascript:void(0)" onclick="Toast.show('Simulated external partner link.')" style="font-size: 0.76rem; color: var(--accent-forest); font-weight: 600;">Learn More →</a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3.2 TASKS ENGINE VIEW -->
+            <section id="view-app-tasks" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">Task Management</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Organize, prioritize, and structure your daily execution.</p>
+                </div>
+                <button class="btn btn-primary" onclick="Modals.openQuickTask()">+ New Task</button>
+              </div>
+
+              <!-- Filter Pills -->
+              <div class="task-filter-bar">
+                <button class="btn btn-secondary btn-sm active filter-btn" onclick="Tasks.applyFilter('all', this)">All Tasks</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('today', this)">Due Today</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('high', this)">High Priority</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('work', this)">Work</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('personal', this)">Personal</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('academic', this)">Academic</button>
+                <button class="btn btn-secondary btn-sm filter-btn" onclick="Tasks.applyFilter('completed', this)">Completed</button>
+              </div>
+
+              <!-- Task List Container -->
+              <div id="full-task-list" class="today-panel-card" style="padding: 16px;">
+                <!-- Dynamically rendered -->
+              </div>
+            </section>
+
+            <!-- 3.3 CALENDAR & SCHEDULING VIEW -->
+            <section id="view-app-calendar" class="view-section">
+              <div class="calendar-topbar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;" id="calendar-month-title">October 2026</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Interactive schedule and planned focus sessions.</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" onclick="CalendarView.prevMonth()">← Prev</button>
+                  <button class="btn btn-secondary btn-sm" onclick="CalendarView.goToToday()">Today</button>
+                  <button class="btn btn-secondary btn-sm" onclick="CalendarView.nextMonth()">Next →</button>
+                  <button class="btn btn-primary btn-sm" onclick="CalendarView.openAddEventModal()">+ Add Event</button>
+                </div>
+              </div>
+
+              <!-- Calendar Google Sync Notice -->
+              <div style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.88rem;">
+                  <strong>Google Calendar Integration:</strong>
+                  <span style="color: var(--text-muted); margin-left: 6px;">Demo Mode Active. (Requires OAuth 2.0 client ID for live production sync).</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="CalendarView.connectGoogleCalendar()">Connect Google Calendar</button>
+              </div>
+
+              <!-- Calendar Grid -->
+              <div class="calendar-grid" id="calendar-grid-container">
+                <!-- Dynamically generated 7-column month grid -->
+              </div>
+            </section>
+
+            <!-- 3.4 FOCUS MODE (DEEP WORK) -->
+            <section id="view-app-focus" class="view-section">
+              <div class="focus-container" id="focus-workspace">
+                <div class="focus-task-tag" id="focus-task-pill">🎯 Deep Work Session</div>
+                <h2 class="focus-task-title" id="focus-current-title">Select a task to begin</h2>
+                <div class="focus-quote" id="focus-quote-text">“Focus is a muscle. Train it with intentional presence.”</div>
+
+                <!-- Circular Timer SVG Graphic -->
+                <div class="timer-display-box">
+                  <svg class="timer-circle-svg" viewBox="0 0 100 100">
+                    <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+                    <circle id="timer-progress-ring" class="timer-circle-progress" cx="50" cy="50" r="45" stroke-dasharray="282.7" stroke-dashoffset="0"></circle>
+                  </svg>
+                  <div class="timer-digits" id="timer-countdown">25:00</div>
+                </div>
+
+                <!-- Timer Controls -->
+                <div class="focus-controls-row">
+                  <button class="btn btn-secondary" onclick="FocusMode.toggleFullscreen()" id="btn-fullscreen-toggle">⛶ Fullscreen</button>
+                  <button class="btn btn-primary btn-lg" id="btn-timer-toggle" onclick="FocusMode.toggleTimer()">Start Session</button>
+                  <button class="btn btn-coral" id="btn-timer-reset" onclick="FocusMode.cancelTimer()">Reset</button>
+                </div>
+
+                <!-- Preset Durations -->
+                <div class="preset-pills">
+                  <button class="preset-pill active" onclick="FocusMode.setPreset(25, this)">25 min</button>
+                  <button class="preset-pill" onclick="FocusMode.setPreset(45, this)">45 min</button>
+                  <button class="preset-pill" onclick="FocusMode.setPreset(60, this)">60 min</button>
+                  <button class="preset-pill" onclick="FocusMode.setPreset(15, this)">15 min</button>
+                </div>
+
+                <!-- Ambient Audio Simulator -->
+                <div class="sound-toggle-bar">
+                  <span>🎧 Ambient Focus Sound:</span>
+                  <select id="ambient-sound-select" class="form-select" style="width: auto; padding: 4px 10px; font-size: 0.8rem;" onchange="FocusMode.handleSoundChange(this.value)">
+                    <option value="none">Muted (Silent)</option>
+                    <option value="whitenoise">Gentle White Noise (Simulated)</option>
+                    <option value="rain">Soft Rain Ambience (Simulated)</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3.5 REFERENCE HUB (NOTES) -->
+            <section id="view-app-notes" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">Reference Hub</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Micro notes, meeting summaries, and quick references.</p>
+                </div>
+                <button class="btn btn-primary" onclick="Notes.createNewNote()">+ New Note</button>
+              </div>
+
+              <div class="notes-layout">
+                <!-- Sidebar Note List -->
+                <div class="notes-sidebar">
+                  <div class="form-group" style="margin-bottom: 8px;">
+                    <input type="text" class="form-input" placeholder="Search notes..." oninput="Notes.searchNotes(this.value)">
+                  </div>
+                  <div class="notes-list" id="notes-item-list">
+                    <!-- Dynamically generated note items -->
+                  </div>
+                </div>
+
+                <!-- Note Editor -->
+                <div class="note-editor-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span id="note-save-status" style="font-size: 0.8rem; color: var(--accent-forest);">Saved locally</span>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn btn-secondary btn-sm" onclick="Notes.copyCurrentNote()">Copy</button>
+                      <button class="btn btn-coral btn-sm" onclick="Notes.deleteCurrentNote()">Delete</button>
+                    </div>
+                  </div>
+                  <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title..." oninput="Notes.handleTitleInput(this.value)">
+                  <textarea id="note-body-input" class="note-textarea" placeholder="Start typing notes, meeting points, references..." oninput="Notes.handleBodyInput(this.value)"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3.6 INSIGHTS & ANALYTICS -->
+            <section id="view-app-insights" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">Productivity Insights</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Clear analytics derived from your actual stored sessions and tasks.</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm active" onclick="Insights.setPeriod('week', this)">Last 7 Days</button>
+                  <button class="btn btn-secondary btn-sm" onclick="Insights.setPeriod('month', this)">Last 30 Days</button>
+                </div>
+              </div>
+
+              <!-- Visual Charts (Native Lightweight SVG) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="chart-container">
+                  <h3 style="font-size: 1.05rem; margin-bottom: 14px;">Focus Minutes Per Day</h3>
+                  <div id="chart-focus-minutes">
+                    <!-- SVG Chart injected via JS -->
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <h3 style="font-size: 1.05rem; margin-bottom: 14px;">Task Completion Trends</h3>
+                  <div id="chart-tasks-completed">
+                    <!-- SVG Chart injected via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Explanatory Breakdown Table -->
+              <div class="today-panel-card" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 12px;">Workload & Category Distribution</h3>
+                <div id="category-distribution-list">
+                  <!-- Category bars injected via JS -->
+                </div>
+              </div>
+            </section>
+
+            <!-- 3.7 AI COACH -->
+            <section id="view-app-ai" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">AI Productivity Coach</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Convert vague goals into structured subtasks and actionable deep work.</p>
+                </div>
+                <div class="badge badge-amber" id="ai-quota-badge">Demo Mode: 15/15 Requests Remaining</div>
+              </div>
+
+              <div class="ai-coach-grid">
+                <!-- Chat Window -->
+                <div class="ai-chat-card">
+                  <div class="ai-message-list" id="ai-chat-messages">
+                    <div class="ai-msg assistant">
+                      Hello! I'm your NOTO productivity coach. Tell me a task or project you're feeling stuck on, and I'll help you break it into realistic steps.
+                    </div>
+                  </div>
+                  <div class="ai-input-bar">
+                    <input type="text" id="ai-user-prompt" class="form-input" placeholder="e.g. Help me break down my final project proposal..." onkeydown="if(event.key==='Enter') AICoach.sendMessage()">
+                    <button class="btn btn-primary" onclick="AICoach.sendMessage()">Send</button>
+                  </div>
+                </div>
+
+                <!-- Quick Prompts / Capabilities -->
+                <div class="today-panel-card">
+                  <h3 style="margin-bottom: 14px;">Coach Tools</h3>
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;" onclick="AICoach.runPrompt('Break down my top priority task into 3 subtasks')">⚡ Break Down Priority Task</button>
+                    <button class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;" onclick="AICoach.runPrompt('How can I overcome afternoon procrastination?')">🛡️ Anti-Procrastination Guide</button>
+                    <button class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;" onclick="AICoach.runPrompt('Generate my daily productivity review')">📝 Generate Daily Review</button>
+                  </div>
+
+                  <div style="margin-top: 24px; padding: 12px; background-color: var(--bg-surface-soft); border-radius: var(--radius-md); font-size: 0.8rem; color: var(--text-muted);">
+                    <strong>Provider Architecture:</strong> In this static client, responses are powered by an explainable, deterministic local reasoning engine. For live LLM connectivity (e.g. Gemini / OpenAI), configure a secure backend proxy.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3.8 PREMIUM SUBSCRIPTION & ADD-ON STORE -->
+            <section id="view-app-premium" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">NOTO Premium & Modular Add-Ons</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Buka kuota AI Coach tanpa batas, analisis fokus mendalam, dan alur kerja kustom.</p>
+                </div>
+              </div>
+
+              <!-- Active Membership Status Banner Slot -->
+              <div id="premium-membership-banner-slot"></div>
+
+              <!-- Pricing Cards Grid -->
+              <div class="pricing-grid" style="margin-bottom: 40px;">
+                <div class="pricing-card" id="pricing-card-monthly">
+                  <div class="pricing-header">
+                    <h3>Monthly Plan</h3>
+                    <p>Langganan fleksibel bulanan</p>
+                  </div>
+                  <div class="price-tag">Rp20.000<span> / bln</span></div>
+                  <ul class="pricing-features">
+                    <li>✓ 15 AI breakdowns / bulan</li>
+                    <li>✓ Penyimpanan Cloud & Lokal</li>
+                    <li>✓ Audio Relaksasi Fokus Standar</li>
+                  </ul>
+                  <button class="btn btn-secondary" id="btn-plan-monthly" onclick="PremiumStore.openCheckout('Monthly Plan', 'Rp20.000', 'subscription')">Upgrade Bulanan</button>
+                </div>
+
+                <div class="pricing-card featured" id="pricing-card-yearly">
+                  <span class="popular-badge">PALING HEMAT</span>
+                  <div class="pricing-header">
+                    <h3>Yearly Plan</h3>
+                    <p>Paling direkomendasikan & hemat 50%</p>
+                  </div>
+                  <div class="price-tag">Rp160.000<span> / thn</span></div>
+                  <ul class="pricing-features">
+                    <li>✓ Unlimited AI Productivity Coach</li>
+                    <li>✓ Analisis Deep Work & Grafik Lengkap</li>
+                    <li>✓ Sinkronisasi Kalender Prioritas</li>
+                    <li>✓ Gratis Semua Power Add-ons</li>
+                  </ul>
+                  <button class="btn btn-primary" id="btn-plan-yearly" onclick="PremiumStore.openCheckout('Yearly Plan', 'Rp160.000', 'subscription')">Upgrade 1 Tahun</button>
+                </div>
+
+                <div class="pricing-card" id="pricing-card-6month">
+                  <div class="pricing-header">
+                    <h3>6 Months Plan</h3>
+                    <p>Paket fokus jangka menengah</p>
+                  </div>
+                  <div class="price-tag">Rp100.000<span> / 6 bln</span></div>
+                  <ul class="pricing-features">
+                    <li>✓ 60 AI breakdowns / bulan</li>
+                    <li>✓ Fitur Tagging & Filter Kustom</li>
+                    <li>✓ Auto-Backup JSON Berkala</li>
+                  </ul>
+                  <button class="btn btn-secondary" id="btn-plan-6month" onclick="PremiumStore.openCheckout('6-Month Plan', 'Rp100.000', 'subscription')">Upgrade 6 Bulan</button>
+                </div>
+              </div>
+
+              <!-- Modular Add-Ons Catalog -->
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
+                <h2 style="font-size: 1.3rem;">Modular Power Add-Ons</h2>
+                <span style="font-size: 0.82rem; color: var(--text-muted);">Pembelian sekali bayar (Lifetime Access)</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div class="today-panel-card" id="addon-card-career">
+                  <h4>AI Career Planner</h4>
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-forest); margin: 6px 0;">Rp25.000</div>
+                  <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px;">Generator roadmap karier, portofolio & transisi pekerjaan secara terstruktur.</p>
+                  <button class="btn btn-secondary btn-sm" id="btn-addon-career" onclick="PremiumStore.openCheckout('AI Career Planner', 'Rp25.000', 'addon')">Beli Add-On</button>
+                </div>
+                <div class="today-panel-card" id="addon-card-meeting">
+                  <h4>Meeting Minutes Auto-Generator</h4>
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-forest); margin: 6px 0;">Rp15.000</div>
+                  <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px;">Otomatis ubah catatan rapat kasar jadi ringkasan & butir aksi terformat.</p>
+                  <button class="btn btn-secondary btn-sm" id="btn-addon-meeting" onclick="PremiumStore.openCheckout('Meeting Minutes Auto-Generator', 'Rp15.000', 'addon')">Beli Add-On</button>
+                </div>
+                <div class="today-panel-card" id="addon-card-study">
+                  <h4>AI Study Plan Generator</h4>
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-forest); margin: 6px 0;">Rp20.000</div>
+                  <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px;">Rencana kurikulum, target ujian, dan jadwal belajar terukur untuk pelajar/mahasiswa.</p>
+                  <button class="btn btn-secondary btn-sm" id="btn-addon-study" onclick="PremiumStore.openCheckout('AI Study Plan Generator', 'Rp20.000', 'addon')">Beli Add-On</button>
+                </div>
+              </div>
+
+              <!-- Official QRIS Gateway Showcase Card -->
+              <div class="qris-official-card">
+                <div class="qris-merchant-info-block">
+                  <div class="qris-avatar-icon">💳</div>
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-weight: 800; font-size: 1.05rem;">Pembayaran Resmi Standar QRIS Nasional</span>
+                      <span class="receipt-status-badge" style="margin-bottom: 0;">GOPAY MERCHANT</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 3px;">
+                      Merchant Resmi: <strong>NOTO, DIGITAL & KREATIF</strong> &bull; NMID: <code style="font-family: var(--font-mono); font-weight: 700;">ID1026615042680</code>
+                    </p>
+                    <div style="font-size: 0.78rem; color: var(--text-light); margin-top: 4px;">
+                      Mendukung pembayaran dari GoPay, BCA, Mandiri, BNI, BRI, Dana, OVO, ShopeePay, LinkAja & seluruh mobile banking di Indonesia.
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="PremiumStore.openCheckout('Yearly Plan', 'Rp160.000', 'subscription')">
+                  🔍 Lihat QRIS Pembayaran
+                </button>
+              </div>
+
+              <!-- Transactions Table & Invoices History -->
+              <div class="transactions-container-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700;">Riwayat Pembayaran & Kuitansi</h3>
+                    <p style="color: var(--text-muted); font-size: 0.84rem;">Daftar transaksi pembayaran QRIS dan struk digital resmi Anda.</p>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="PremiumStore.renderTransactions()">🔄 Refresh</button>
+                </div>
+                <div id="premium-transactions-tbody"></div>
+              </div>
+            </section>
+
+            <!-- 3.9 SETTINGS & DATA MANAGEMENT -->
+            <section id="view-app-settings" class="view-section">
+              <div class="tasks-header-bar">
+                <div>
+                  <h1 style="font-size: 1.8rem; font-weight: 800;">Settings & Privacy</h1>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">Manage local preferences, export data, and configure your focus parameters.</p>
+                </div>
+              </div>
+
+              <div class="today-panel-card" style="max-width: 680px;">
+                <h3 style="margin-bottom: 16px;">Profile & Appearance</h3>
+                <div class="form-group">
+                  <label for="settings-name">Display Name</label>
+                  <input type="text" id="settings-name" class="form-input" value="Alex Pratama" onchange="Settings.updateName(this.value)">
+                </div>
+                <div class="form-group">
+                  <label>Color Theme</label>
+                  <select id="settings-theme" class="form-select" onchange="App.setTheme(this.value)">
+                    <option value="light">Warm Editorial (Light)</option>
+                    <option value="dark">Deep Forest (Dark)</option>
+                  </select>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 24px 0;">
+
+                <h3 style="margin-bottom: 16px;">Data & Privacy Controls</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                  All your tasks, logs, focus sessions, and notes are stored locally in your browser. You can export your data at any time as JSON or reset your workspace.
+                </p>
+                <div style="display: flex; gap: 12px;">
+                  <button class="btn btn-secondary" onclick="DataStorage.exportDataJSON()">📥 Export Data (JSON)</button>
+                  <button class="btn btn-coral" onclick="DataStorage.confirmResetData()">⚠️ Clear All Data</button>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-nav-bar">
+        <a class="mobile-nav-item active" data-view="app-today" onclick="App.navigateTo('app-today')">
+          <span>☀️</span>
+          <span>Today</span>
+        </a>
+        <a class="mobile-nav-item" data-view="app-tasks" onclick="App.navigateTo('app-tasks')">
+          <span>✓</span>
+          <span>Tasks</span>
+        </a>
+        <a class="mobile-nav-item" data-view="app-focus" onclick="App.navigateTo('app-focus')">
+          <span>⏱️</span>
+          <span>Focus</span>
+        </a>
+        <a class="mobile-nav-item" data-view="app-calendar" onclick="App.navigateTo('app-calendar')">
+          <span>📅</span>
+          <span>Calendar</span>
+        </a>
+        <a class="mobile-nav-item" data-view="app-notes" onclick="App.navigateTo('app-notes')">
+          <span>📝</span>
+          <span>Notes</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- ======================================================================
+         MODALS & DIALOGS
+         ====================================================================== -->
+    <!-- Task Creation & Edit Modal -->
+    <div id="modal-task" class="modal-overlay">
+      <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 id="modal-task-title">Add New Task</h3>
+          <button class="btn btn-ghost btn-sm" onclick="Modals.close('modal-task')">✕</button>
+        </div>
+        <form onsubmit="Tasks.handleFormSubmit(event)">
+          <input type="hidden" id="task-form-id">
+          <div class="form-group">
+            <label for="task-form-title">Task Title</label>
+            <input type="text" id="task-form-title" class="form-input" placeholder="e.g. Prepare client proposal" required>
+          </div>
+          <div class="form-group">
+            <label for="task-form-desc">Description (Optional)</label>
+            <textarea id="task-form-desc" class="form-textarea" rows="2" placeholder="Details, links, or notes..."></textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="task-form-category">Category</label>
+              <select id="task-form-category" class="form-select">
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Business">Business</option>
+                <option value="Learning">Learning</option>
+                <option value="Academic">Academic</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-form-priority">Priority</label>
+              <select id="task-form-priority" class="form-select">
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="task-form-date">Due Date</label>
+              <input type="date" id="task-form-date" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="task-form-duration">Est. Duration (min)</label>
+              <input type="number" id="task-form-duration" class="form-input" value="25" min="5" step="5">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary" onclick="Modals.close('modal-task')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Calendar Event Modal -->
+    <div id="modal-event" class="modal-overlay">
+      <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3>Add Schedule Event</h3>
+          <button class="btn btn-ghost btn-sm" onclick="Modals.close('modal-event')">✕</button>
+        </div>
+        <form onsubmit="CalendarView.handleEventSubmit(event)">
+          <div class="form-group">
+            <label for="event-form-title">Event Title</label>
+            <input type="text" id="event-form-title" class="form-input" placeholder="e.g. Team Planning Sync" required>
+          </div>
+          <div class="form-group">
+            <label for="event-form-date">Event Date</label>
+            <input type="date" id="event-form-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="event-form-time">Event Time</label>
+            <input type="time" id="event-form-time" class="form-input" value="10:00">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-secondary" onclick="Modals.close('modal-event')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Event</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Session Completion Modal -->
+    <div id="modal-session-complete" class="modal-overlay">
+      <div class="modal-box" style="text-align: center;">
+        <span style="font-size: 2.4rem;">🎉</span>
+        <h3 style="margin-top: 8px; margin-bottom: 6px;">Session Complete!</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+          Great work protecting your focus. What would you like to do next?
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button class="btn btn-primary" onclick="FocusMode.completeSessionAndTask()">Mark Task Complete</button>
+          <button class="btn btn-secondary" onclick="FocusMode.continueWorkingSession()">Continue Another Session</button>
+          <button class="btn btn-ghost" onclick="Modals.close('modal-session-complete')">Close & Rest</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         QRIS PAYMENT SYSTEM MODALS
+         ====================================================================== -->
+    <!-- 1. QRIS Payment Checkout Modal -->
+    <div id="modal-payment-checkout" class="modal-overlay">
+      <div class="modal-box modal-payment">
+        <div class="payment-modal-header">
+          <div>
+            <div class="payment-modal-title">
+              <span>💳</span> Pembayaran QRIS — NOTO Premium
+            </div>
+            <p class="payment-modal-subtitle">Scan & selesaikan pembayaran instan menggunakan GoPay, m-Banking, atau e-Wallet apa saja.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="PremiumStore.closeCheckout()" aria-label="Tutup">✕</button>
+        </div>
+
+        <div class="payment-layout-grid">
+          <!-- Left Column: QR Code Card -->
+          <div>
+            <div class="qris-card-wrapper">
+              <div class="qris-dynamic-badge">
+                <span class="qris-pulse-dot"></span>
+                <span>QRIS Dinamis Otomatis — Nominal Terkunci</span>
+              </div>
+              <div class="qris-image-container" onclick="PremiumStore.zoomQR()" title="Klik untuk memperbesar QR">
+                <img src="assets/images/qris-noto.png" alt="QRIS NOTO, DIGITAL & KREATIF" class="qris-image-img" id="checkout-qris-img">
+              </div>
+
+              <div class="qris-locked-pill">
+                <span>🔒</span>
+                <span>Nominal Terplot: <strong id="checkout-locked-nominal-val" style="font-size: 0.95rem;">Rp20.000</strong></span>
+              </div>
+              <div style="font-size: 0.74rem; color: #16A34A; font-weight: 600; margin-top: 6px; text-align: center;">
+                ✓ Saat di-scan, nominal otomatis terisi. Tinggal ketik PIN.
+              </div>
+
+              <div class="qris-meta-info">
+                <div class="qris-meta-row">
+                  <span style="color: var(--text-muted);">Merchant:</span>
+                  <strong style="color: var(--text-primary);">NOTO, DIGITAL & KREATIF</strong>
+                </div>
+                <div class="qris-meta-row">
+                  <span style="color: var(--text-muted);">NMID:</span>
+                  <span style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-forest);" id="checkout-nmid-val">ID1026615042680</span>
+                </div>
+                <div class="qris-meta-row">
+                  <span style="color: var(--text-muted);">Tipe QRIS:</span>
+                  <span style="font-weight: 700; color: #16A34A;" id="checkout-qr-type-val">Dinamis (Nominal Otomatis)</span>
+                </div>
+                <div class="qris-meta-row">
+                  <span style="color: var(--text-muted);">Dicetak oleh:</span>
+                  <span style="font-family: var(--font-mono);">93600914 (GoPay)</span>
+                </div>
+              </div>
+
+              <div class="qris-action-bar">
+                <a href="assets/images/qris-noto.png" download="QRIS-NOTO-Digital-Kreatif.png" class="btn btn-secondary btn-sm" id="checkout-qr-download-btn" title="Unduh gambar QR">
+                  📥 Unduh QR
+                </a>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="PremiumStore.zoomQR()" title="Perbesar tampilan QR">
+                  🔍 Perbesar
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="PremiumStore.copyNMID()" title="Salin NMID">
+                  📋 Salin NMID
+                </button>
+              </div>
+            </div>
+
+            <!-- Accepted Methods Footer -->
+            <div style="margin-top: 10px; font-size: 0.74rem; text-align: center; color: var(--text-muted);">
+              Terima pembayaran dari <strong>GoPay, BCA, Mandiri, BNI, BRI, Dana, OVO, ShopeePay</strong> & seluruh bank GPN.
+            </div>
+          </div>
+
+          <!-- Right Column: Order Summary & Action Pane -->
+          <div class="payment-details-pane">
+            <!-- Countdown Timer -->
+            <div class="order-countdown-card">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">⏳</span>
+                <div>
+                  <strong style="display: block;">Batas Waktu Pembayaran:</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Selesaikan transaksi sebelum waktu habis</span>
+                </div>
+              </div>
+              <div class="countdown-digits" id="checkout-countdown-display">15:00</div>
+            </div>
+
+            <!-- Order Breakdown Box -->
+            <div class="order-summary-box">
+              <div class="order-summary-title">
+                <span>Rincian Pesanan</span>
+                <span class="badge badge-sage" id="checkout-order-id">NOTO-INV-8492</span>
+              </div>
+              <div class="order-line-item">
+                <span id="checkout-item-title">Yearly Plan</span>
+                <span id="checkout-item-price-subtotal">Rp160.000</span>
+              </div>
+              <div class="order-line-item">
+                <span>Biaya Layanan Admin</span>
+                <span style="color: var(--accent-sage); font-weight: 600;">Gratis (Rp0)</span>
+              </div>
+              <div class="order-line-item total-line">
+                <span>Total Tagihan:</span>
+                <div class="order-amount-highlight">
+                  <span id="checkout-item-price-total">Rp160.000</span>
+                  <button type="button" class="copy-mini-btn" onclick="PremiumStore.copyNominal()" title="Salin nominal transfer">Salin</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Step Instructions -->
+            <div class="payment-instruction-card">
+              <strong style="display: block; margin-bottom: 6px;">Langkah Pembayaran Mudah:</strong>
+              <div class="instruction-steps-list">
+                <div class="instruction-step-item">
+                  <div class="step-num-pill">1</div>
+                  <div>Buka aplikasi <strong>GoPay, BCA, Mandiri, BRImo, Dana</strong>, atau bank apa saja.</div>
+                </div>
+                <div class="instruction-step-item">
+                  <div class="step-num-pill">2</div>
+                  <div>Pilih menu <strong>Scan QRIS</strong> lalu arahkan kamera ke kode QR di samping.</div>
+                </div>
+                <div class="instruction-step-item">
+                  <div class="step-num-pill">3</div>
+                  <div>Pastikan nama merchant: <strong>NOTO, DIGITAL & KREATIF</strong> lalu input nominal pas.</div>
+                </div>
+                <div class="instruction-step-item">
+                  <div class="step-num-pill">4</div>
+                  <div>Selesaikan pembayaran Anda lalu tekan tombol <strong>"Saya Sudah Bayar"</strong> di bawah.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bukti Pembayaran (Opsional) -->
+            <div>
+              <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
+                Unggah Bukti Struk (Opsional):
+              </label>
+              <div class="proof-upload-container" onclick="document.getElementById('checkout-proof-input').click()">
+                <input type="file" id="checkout-proof-input" accept="image/*" style="display: none;" onchange="PremiumStore.handleProofFile(this)">
+                <div id="checkout-proof-placeholder">
+                  <span style="font-size: 1.3rem;">📷</span>
+                  <div style="font-size: 0.8rem; font-weight: 600; margin-top: 2px;">Klik untuk upload screenshot struk (opsional)</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Format JPG, PNG, atau WEBP</div>
+                </div>
+                <div id="checkout-proof-preview-zone" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 6px;">
+              <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="PremiumStore.closeCheckout()">Batalkan</button>
+              <button type="button" class="btn btn-primary" style="flex: 2; font-weight: 700; box-shadow: var(--shadow-md);" onclick="PremiumStore.confirmPayment()">
+                ✓ Saya Sudah Bayar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Verifying Payment Animation Modal -->
+    <div id="modal-payment-verifying" class="modal-overlay">
+      <div class="modal-box modal-verifying-box" style="max-width: 440px;">
+        <div class="verifying-spinner"></div>
+        <h3 style="font-size: 1.3rem; margin-bottom: 8px;">Memverifikasi Pembayaran...</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 12px;">
+          Sedang memeriksa status transaksi QRIS ke merchant <strong>NOTO, DIGITAL & KREATIF</strong>...
+        </p>
+        <div class="badge badge-amber" style="padding: 6px 14px; font-size: 0.78rem;">Mohon jangan tutup jendela ini</div>
+      </div>
+    </div>
+
+    <!-- 3. Payment Success & Digital Receipt Modal -->
+    <div id="modal-payment-success" class="modal-overlay">
+      <div class="modal-box modal-receipt-box">
+        <div class="receipt-sheet" id="receipt-print-area">
+          <div class="receipt-header">
+            <div class="receipt-status-badge">
+              <span>✓</span> PEMBAYARAN TERVERIFIKASI
+            </div>
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 4px;">Kuitansi Resmi NOTO</h2>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Layanan Produktivitas & Langganan Digital</div>
+          </div>
+
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">No. Invoice</span>
+            <strong style="font-family: var(--font-mono);" id="receipt-invoice-no">NOTO-INV-8492</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Waktu Transaksi</span>
+            <span id="receipt-date-time">13 Okt 2026, 13:45 WIB</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Merchant Penerima</span>
+            <strong style="color: var(--text-primary);">NOTO, DIGITAL & KREATIF</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">NMID</span>
+            <span style="font-family: var(--font-mono); font-size: 0.82rem;">ID1026615042680</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Metode Pembayaran</span>
+            <span>QRIS (GoPay Merchant & Bank GPN)</span>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Item / Paket</span>
+            <strong id="receipt-item-name">Yearly Plan (1 Tahun Pro)</strong>
+          </div>
+          <div class="receipt-row">
+            <span style="color: var(--text-muted);">Status Pembayaran</span>
+            <span class="badge badge-success" style="font-size: 0.76rem;">LUNAS (VERIFIED)</span>
+          </div>
+
+          <div class="receipt-row receipt-row-total">
+            <span>Total Dibayar:</span>
+            <span class="order-amount-highlight" id="receipt-total-paid" style="font-size: 1.3rem;">Rp160.000</span>
+          </div>
+
+          <div class="receipt-perks-list" id="receipt-perks-list">
+            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">🎉 Fitur Telah Aktif:</div>
+            <div>• Kuota AI Coach kini Tanpa Batas (Unlimited)</div>
+            <div>• Analisis Produktivitas Mendalam & Mode Fokus Penuh</div>
+            <div>• Akses Penuh ke Modul Pro & Auto Backup</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;" class="no-print">
+          <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="PremiumStore.printReceipt()">
+            🖨️ Cetak / Unduh Struk
+          </button>
+          <button type="button" class="btn btn-primary" style="flex: 1.4; font-weight: 700;" onclick="PremiumStore.finishSuccess()">
+            🚀 Masuk ke Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. QR Zoom Modal -->
+    <div id="modal-qr-zoom" class="modal-overlay">
+      <div class="modal-box modal-qr-zoom-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <h4 style="font-size: 1rem; font-weight: 700; margin: 0;">QRIS NOTO, DIGITAL & KREATIF</h4>
+            <span style="font-size: 0.74rem; color: #16A34A; font-weight: 600;">⚡ QRIS Dinamis — Nominal Otomatis Terkunci</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="PremiumStore.closeZoomQR()">✕</button>
+        </div>
+        <img src="assets/images/qris-noto.png" alt="QRIS Enlarged" class="qr-zoom-img" id="zoom-qris-img">
+        <div class="qris-locked-pill" style="margin-bottom: 14px;">
+          <span>🔒</span>
+          <span>Nominal Terkunci: <strong id="zoom-locked-nominal-val">Rp20.000</strong> (Tinggal masukkan PIN)</span>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 10px;">
+          <a href="assets/images/qris-noto.png" download="QRIS-NOTO-Digital-Kreatif.png" class="btn btn-primary btn-sm" id="zoom-qr-download-btn">
+            📥 Unduh File QR
+          </a>
+          <button class="btn btn-secondary btn-sm" onclick="PremiumStore.closeZoomQR()">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+  </div>
+
+  <!-- Pure Vanilla JavaScript Modules -->
+  <script src="assets/js/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
